@@ -34,5 +34,30 @@ Celem projektu jest opracowanie sysmulacji pozwalającej obserwować zachodzenie
  * gdy są syte mogą się krzyżować
  * jeśli nie będą w stanie zdobyć pożywienia umierają z głodu
 
+== Przystosowania organizmów ==
 
+Każdy organizm posiada wektor liczb określający przystosowania zwierzęcia (w sposób ciągły). Przystosowania decydują o cechach organizmu - są przeliczane na wektor cech reprezentowanych przez liczby.
 
+Przykładowo:
+
+Przystosowania:
+ * (1) Długość łap przednich: (a)+0.7, (b)-0.3, (c)+0.4
+ * (2) Długość łap tylnych: (a)+1.4, (b)-0.1, (c)+0.4
+ * (3) Wielkość uszu: (c)+0.8
+
+Cechy:
+ * (a) Szybkość
+ * (b) Zwrotność
+ * (c) Zdolność zauważania niebezpieczeństwa
+
+Wektor przystosowań: [1.0, 2.0, 3.0]
+=>
+Wektor cech: TODO
+
+== Krzyżowanie ==
+
+Przy krzyżowaniu powstaje nowy organizm dziedziczący wektor przystosowań po swoich rodzicach.
+
+Wynikowy wektor przystosowań powstaje poprzez:
+ * krzyżowanie
+ * mutacje
