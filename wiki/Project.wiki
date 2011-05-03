@@ -7,17 +7,36 @@
 = Modelowane klasy =
 
 == Agenci statyczni ==
- * Plant ([http://code.google.com/p/evolv/wiki/Intro#Roślinki analiza]) - Pierwsze ogniwo łańcucha pokarmowego
+ * *Plant* ([http://code.google.com/p/evolv/wiki/Intro#Roślinki analiza]) - Pierwsze ogniwo łańcucha pokarmowego
 
 == Agenci mobilni ==
- * Rabbit ([http://code.google.com/p/evolv/wiki/Intro#Ofiary analiza]) - Ofiary
- * Wolf ([http://code.google.com/p/evolv/wiki/Intro#Drapieżniki analiza]) - Drapieżniki
+ * *Rabbit* ([http://code.google.com/p/evolv/wiki/Intro#Ofiary analiza]) - Ofiary
+ * *Wolf* ([http://code.google.com/p/evolv/wiki/Intro#Drapieżniki analiza]) - Drapieżniki
 
 == Cechy i przystosowania ==
- * Anatomy - cechy fizyczne zwierząt (klasa: Animal)
- * Abilities - zdolności zwierząt mające bezpośredni wpływ na ich przetrwanie
- Więcej: [http://code.google.com/p/evolv/wiki/Intro#Przystosowania_organizmów analiza]
+ * *Anatomy* - cechy fizyczne zwierząt (klasa: Animal)
+   * size
+   * ears
+   * legs
+   * tail
+   * teeth
+   * fur
+   * eyes
+   * pregnancy
+   * stomach
+   * muzzle
+
+ * *Abilities* - zdolności zwierząt mające bezpośredni wpływ na ich przetrwanie
+   * speed
+   * agility
+   * observation
+   * camouflage
+   * urge
+   * digestion
+   * effectiveness
+
+ Analiza: [http://code.google.com/p/evolv/wiki/Intro#Przystosowania_organizmów link]
 
 == Środowisko życia organizmów ==
- * Environment - Kontroler animacji, reprezentacja świata symulacji
- * Tree, Meadow (Terrain) - Obszar na mapie mający wpływ na zdolności zwierząt
+ * *Environment* - Kontroler animacji, reprezentacja świata symulacji
+ * *Tree*, *Meadow* (*Terrain*) - Obszar na mapie mający wpływ na zdolności zwierząt
