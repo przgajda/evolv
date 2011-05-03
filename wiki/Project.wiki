@@ -8,10 +8,16 @@
 
 == Agenci statyczni ==
  * *Plant* ([http://code.google.com/p/evolv/wiki/Intro#Roślinki analiza]) - Pierwsze ogniwo łańcucha pokarmowego
+   * energy
 
 == Agenci mobilni ==
  * *Rabbit* ([http://code.google.com/p/evolv/wiki/Intro#Ofiary analiza]) - Ofiary
  * *Wolf* ([http://code.google.com/p/evolv/wiki/Intro#Drapieżniki analiza]) - Drapieżniki
+ 
+  Klasa bazowa - *Animal*:
+   * energy
+   * health
+   * age
 
 == Cechy i przystosowania ==
  * *Anatomy* - cechy fizyczne zwierząt (klasa: Animal)
