@@ -4,12 +4,16 @@
 
 [http://evolv.googlecode.com/svn/trunk/doc/images/classdiagram.png]
 
-= Agenci statyczni =
- * Plant ([http://code.google.com/p/evolv/wiki/Intro#Roślinki analiza])
-   Pierwsze ogniwo łańcucha pokarmowego
+= Modelowane klasy =
 
-= Agenci mobilni -  =
- * Rabbit ([http://code.google.com/p/evolv/wiki/Intro#Ofiary analiza])
-   Ofiary
- * Wolf ([http://code.google.com/p/evolv/wiki/Intro#Drapieżniki analiza])
-   Drapieżniki
+== Agenci statyczni ==
+ * Plant ([http://code.google.com/p/evolv/wiki/Intro#Roślinki analiza]) - Pierwsze ogniwo łańcucha pokarmowego
+
+== Agenci mobilni ==
+ * Rabbit ([http://code.google.com/p/evolv/wiki/Intro#Ofiary analiza]) - Ofiary
+ * Wolf ([http://code.google.com/p/evolv/wiki/Intro#Drapieżniki analiza]) - Drapieżniki
+
+== Cechy i przystosowania ==
+ * Anatomy - cechy fizyczne zwierząt (klasa: Animal)
+ * Abilities - zdolności zwierząt mające bezpośredni wpływ na ich przetrwanie
+ Więcej: [http://code.google.com/p/evolv/wiki/Intro#Przystosowania_organizmów analiza]
