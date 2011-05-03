@@ -1,0 +1,15 @@
+#summary Projekt systemu
+
+= Diagram klas =
+
+[http://evolv.googlecode.com/svn/trunk/doc/images/classdiagram.png]
+
+= Agenci statyczni =
+ * Plant ([http://code.google.com/p/evolv/wiki/Intro#Roślinki analiza])
+   Pierwsze ogniwo łańcucha pokarmowego
+
+= Agenci mobilni -  =
+ * Rabbit ([http://code.google.com/p/evolv/wiki/Intro#Ofiary analiza])
+   Ofiary
+ * Wolf ([http://code.google.com/p/evolv/wiki/Intro#Drapieżniki analiza])
+   Drapieżniki
