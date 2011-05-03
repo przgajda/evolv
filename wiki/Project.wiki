@@ -17,3 +17,7 @@
  * Anatomy - cechy fizyczne zwierząt (klasa: Animal)
  * Abilities - zdolności zwierząt mające bezpośredni wpływ na ich przetrwanie
  Więcej: [http://code.google.com/p/evolv/wiki/Intro#Przystosowania_organizmów analiza]
+
+== Środowisko życia organizmów ==
+ * Environment - Kontroler animacji, reprezentacja świata symulacji
+ * Tree, Meadow (Terrain) - Obszar na mapie mający wpływ na zdolności zwierząt
