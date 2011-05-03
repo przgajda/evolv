@@ -14,7 +14,7 @@
  * *Rabbit* ([http://code.google.com/p/evolv/wiki/Intro#Ofiary analiza]) - Ofiary
  * *Wolf* ([http://code.google.com/p/evolv/wiki/Intro#Drapieżniki analiza]) - Drapieżniki
  
-  Klasa bazowa - *Animal*:
+ * *Animal* - Klasa bazowa
    * energy
    * health
    * age
