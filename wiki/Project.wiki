@@ -20,7 +20,7 @@
    * age
 
 == Cechy i przystosowania ==
- * *Anatomy* - cechy fizyczne zwierząt (klasa: Animal)
+ * *Anatomy* - genotyp, cechy fizyczne zwierząt (klasa: Animal)
    * size
    * ears
    * legs
@@ -32,7 +32,7 @@
    * stomach
    * muzzle
 
- * *Abilities* - zdolności zwierząt mające bezpośredni wpływ na ich przetrwanie
+ * *Abilities* - fenotyp, zdolności zwierząt mające bezpośredni wpływ na ich przetrwanie
    * speed
    * agility
    * observation
@@ -46,3 +46,15 @@
 == Środowisko życia organizmów ==
  * *Environment* - Kontroler animacji, reprezentacja świata symulacji
  * *Tree*, *Meadow* (*Terrain*) - Obszar na mapie mający wpływ na zdolności zwierząt
+
+
+= Algorytmy =
+
+== Krzyżowanie organizmów ==
+
+=== Crossover ===
+pji
+
+=== Mutation ===
+
+pji
