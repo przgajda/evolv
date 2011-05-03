@@ -53,8 +53,10 @@
 == Krzyżowanie organizmów ==
 
 === Crossover ===
-pji
+ * n-point crossover - przecięcie genotypu w n losowych miejscach
+ * uniform crossover - losowy dobór genotypu od rodziców
+ * arithmetic crossover  - wyliczenie genotypu na podstawie genotypów rodziców
 
 === Mutation ===
-
-pji
+ * arithmetic - zmiana wartości genotypu za pomocą losowej operacji arytmetycznej
+ * random - zmiana wartości genotypu na inna wartość losową
