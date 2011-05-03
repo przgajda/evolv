@@ -52,6 +52,8 @@
 
 == Krzyżowanie organizmów ==
 
+[http://evolv.googlecode.com/svn/trunk/doc/images/genetics.png]
+
 === Crossover ===
  * n-point crossover - przecięcie genotypu w n losowych miejscach
  * uniform crossover - losowy dobór genotypu od rodziców
