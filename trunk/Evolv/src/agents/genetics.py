@@ -9,6 +9,9 @@ from simulation.error import EvolvError
 
 
 class Gene(object):
+    
+    MIN = -7.0
+    MAX = 7.0
 
     def __init__(self, name, value):
         super(Gene, self).__init__()
@@ -17,16 +20,24 @@ class Gene(object):
             raise EvolvError("Invalid gene name")
 
         self.name = name
-        self.value = value
+        self.__value = value
         self.impacts = {}
+        
+    def get_value(self):
+        return self.__value
+        
+    def set_value(self, value):
+        self.__value = min(max(value, Gene.MIN), Gene.MAX)
 
-    def append_impact(self, name, add, mul):
+    def add_impact(self, name, add=0.0, mul=1.0):
         u"""
-        Append gene impact on phene of given name
+        Adding gene impact on phene of given name
         """
         if name not in Phenotype.VALID:
             raise EvolvError("Invalid phene")
         self.impacts[name] = lambda x: x * mul + add
+        
+        return self
 
     def modify_phenotype(self, phenotype):
         u"""
@@ -35,8 +46,11 @@ class Gene(object):
         for phene in phenotype:
             if phene.name in self.impacts:
                 func = self.impacts[phene.name]
-                new_value = func(phene.value)
-                phene.value = new_value
+                new_value = func(phene.get_value())
+                phene.set_value(new_value)
+                
+    def __str__(self):
+        print "<Gene %s : %.3f>" % (self.name, self.value)
 
 
 class Phene(object):
@@ -48,13 +62,23 @@ class Phene(object):
             raise EvolvError("Invalid phene name")
 
         self.name = name
-        self.value = value
+        self.__value = value
+        
+    def get_value(self):
+        return self.__value
+        
+    def set_value(self, value):
+        self.__value = value
+        
+    def __str__(self):
+        print "<Phene %s : %.3f>" % (self.name, self.__value)
 
 
 class Genotype(list):
 
-    VALID = """size ears legs tail teeth fur eyes pregnancy 
-                stomach muzzle""".split()
+    #VALID = """size ears legs tail teeth fur eyes pregnancy 
+    #            stomach muzzle""".split()
+    VALID = """size ears legs fur eyes""".split()
 
     def __init__(self, *args):
         super(Genotype, self).__init__(*args)
@@ -75,26 +99,106 @@ class Genotype(list):
             else:
                 res.extend(genotype_b[last:c])
             last = c
+            
         return res
+    
+    @staticmethod
+    def npoint_random_mutation(n, genotype):
+        res = Genotype()
+        res.extend(genotype[:])
+        
+        for _ in range(n):
+            idx = random.randint(0, len(genotype) - 1)
+            change = random.random() + 0.5 
+            res[idx].set_value(res[idx].get_value() * change)
+        
+        return res
+    
+    def get_gene(self, name):
+        for gene in self:
+            if gene.name == name:
+                return gene
+        return None
 
 
 class Phenotype(list):
 
-    VALID = """speed agility observation camouflage urge 
-                digestion effectiveness""".split()
+#    VALID = """speed agility observation camouflage urge 
+#                digestion effectiveness strength""".split()
+    VALID = """speed observation camouflage strength""".split()
 
     def __init__(self, *args):
         super(Phenotype, self).__init__(*args)
 
-    def from_genotype(self, genotype, default=0):
+    @staticmethod
+    def from_genotype(genotype, default=1.0):
         u"""
-        Constructs phenotype according to genotype
+        Constructs phenotype from genotype
         """
+        res = Phenotype()
+        
         for name in Phenotype.VALID:
-            self.append(Phene(name, default))
+            res.append(Phene(name, default))
 
         for gene in genotype:
-            gene.modify_phenotype(self)
+            gene.modify_phenotype(res)
+            
+        return res
+    
+    def get_phene(self, name):
+        for phene in self:
+            if phene.name == name:
+                return phene
+        return None
+    
+    
+def create_simple_genotype(default=0.0):
+    """
+    Genes: size ears legs fur eyes
+    Phenes: speed observation camouflage strength
+    """
+    g = Genotype()
+    g.append(Gene('size', default)
+             .add_impact('speed', add= -0.3)
+             .add_impact('camouflage', add= -0.2)
+             .add_impact('strength', add= +0.5))
+    g.append(Gene('ears', default)
+             .add_impact('speed', add= -0.2)
+             .add_impact('observation', add= +0.4)
+             .add_impact('camouflage', add= -0.2))
+    g.append(Gene('legs', default)
+             .add_impact('speed', add= +0.3)
+             .add_impact('observation', add= +0.2)
+             .add_impact('camouflage', add= -0.2)
+             .add_impact('strength', add= -0.3))
+    g.append(Gene('fur', default)
+             .add_impact('speed', add= -0.3)
+             .add_impact('camouflage', add= +0.3))
+    g.append(Gene('eyes', default)
+             .add_impact('observation', add= +0.4)
+             .add_impact('camouflage', add= -0.1)
+             .add_impact('strength', add= -0.3))
+    return g
+
+
+def create_rabbit_genotype():
+    g = create_simple_genotype()
+    g.get_gene('size').set_value(-2.0)
+    g.get_gene('ears').set_value(4.0)
+    g.get_gene('legs').set_value(1.0)
+    g.get_gene('fur').set_value(3.0)
+    g.get_gene('eyes').set_value(1.0)
+    return g
+
+
+def create_wolf_genotype():
+    g = create_simple_genotype()
+    g.get_gene('size').set_value(4.0)
+    g.get_gene('ears').set_value(1.0)
+    g.get_gene('legs').set_value(3.0)
+    g.get_gene('fur').set_value(2.0)
+    g.get_gene('eyes').set_value(1.0)
+    return g
 
 
 if __name__ == '__main__':
