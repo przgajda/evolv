@@ -14,7 +14,7 @@ class Plant(Stationary):
         super(Plant, self).__init__()
 
         self.size = 0
-        self.energy = 0
+        self.energy = 30
 
     def initWith(self):
         self.size = 0.2
