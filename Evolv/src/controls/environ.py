@@ -19,8 +19,12 @@ class Environ(Control):
     Y = 0.0
     SIZE = 25.0
 
+    instance = None
+
     def __init__(self):
         super(Environ, self).__init__()
+
+        Environ.instance = self
 
         self.enableShadows()
         self.enableSmoothDrawing()
@@ -29,6 +33,10 @@ class Environ(Control):
 
         self.offsetCamera(breve.vector(0, 40, 0))
         self.aimCamera(breve.vector(0, 0, 0))
+
+        self.plants = []
+        self.rabbits = []
+        self.wolves = []
 
         player.play('hello')
 
@@ -47,17 +55,49 @@ class Environ(Control):
         for rabbit in rabbits:
             rabbit.initWith(create_rabbit_genotype())
             rabbit.move(self.get_birthplace(rabbit.size))
+        self.rabbits.extend(rabbits)
 
-        wolfs = breve.createInstances(Wolf, 10)
-        for wolf in wolfs:
+        wolves = breve.createInstances(Wolf, 5)
+        for wolf in wolves:
             wolf.initWith(create_wolf_genotype())
             wolf.move(self.get_birthplace(wolf.size))
+        self.wolves.extend(wolves)
 
-        plants = breve.createInstances(Plant, 10)
+        plants = breve.createInstances(Plant, 15)
         for plant in plants:
             plant.initWith()
             plant.move(self.get_birthplace(plant.size))
+        self.plants.extend(plants)
 
     def iterate(self):
-        self.updateNeighbors()
         super(Environ, self).iterate()
+
+        for plant in self.plants:
+            if plant.energy < 0.01:
+                print "plant eaten"
+                self.plants.remove(plant)
+                breve.deleteInstance(plant)
+
+        for rabbit in self.rabbits:
+            if rabbit.health < 0.01 and rabbit.energy < 0.01:
+                print "rabbit eaten"
+                self.rabbits.remove(rabbit)
+                breve.deleteInstance(rabbit)
+
+        for wolf in self.wolves:
+            if wolf.health < 0.01 and wolf.energy < 0.01:
+                print "wolf eaten"
+                self.wolves.remove(wolf)
+                breve.deleteInstance(wolf)
+
+        self.updateNeighbors()
+
+    def born_rabbit(self, rabbit1, rabbit2):
+        print "rabbit borned"
+        pos = rabbit1.getLocation()
+        rabbit = breve.createInstances(Rabbit, 1)
+        rabbit.initWith(create_rabbit_genotype())
+        rabbit.move(pos)
+        self.rabbits.append(rabbit)
+
+
