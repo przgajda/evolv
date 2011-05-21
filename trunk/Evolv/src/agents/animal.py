@@ -12,29 +12,30 @@ from breve import Sphere
 
 from agents.genetics import Phenotype, Gene
 from agents.plant import Plant
+from meeting import RabbitPlantMeeting, WolfRabbitMeeting, RabbitRabbitMeeting
 
 
 class Animal(Mobile):
 
     NEIGHBORHOOD = 5
     MAXHEALTH = 100
-    MOVE = -0.1
+    MAXENERGY = 100
 
     def __init__(self):
         super(Animal, self).__init__()
         #self.handleCollisions('Animal', 'meet_agent')
 
-        self.last_iter = 0
+        self.last_iter = time.time()
 
         self.genotype = None
         self.phenotype = None
 
         self.size = 0
-        self.energy = 100
+        self.energy = Animal.MAXENERGY
         self.health = Animal.MAXHEALTH
-        self.age = 0
+        self.born_time = time.time()
 
-        self.showNeighborLines()
+        #self.showNeighborLines()
         self.setNeighborhoodSize(Rabbit.NEIGHBORHOOD)
 
         self.handleCollisions('Plant', 'meet_plant')
@@ -54,6 +55,9 @@ class Animal(Mobile):
 
         return self
 
+    def get_age(self):
+        return time.time() - self.born_time
+
     def meet_plant(self, plant):
         pass
 
@@ -64,11 +68,17 @@ class Animal(Mobile):
         pass
 
     def iterate(self):
+        super(Animal, self).iterate()
+
+        self.time_diff = time.time() - self.last_iter
         self.last_iter = time.time()
 
         self.check_location()
 
-        super(Animal, self).iterate()
+        if self.energy < 20:
+            self.update_health(-self.time_diff)
+        if self.energy > 50:
+            self.update_health(3.0 * self.time_diff)
 
     def check_location(self):
         from controls.environ import Environ
@@ -105,44 +115,48 @@ class Animal(Mobile):
                 plants.append(agent)
         return rabbits, wolfs, plants
 
-    #def meet_agent(self, agent):
-    #    if isinstance(agent, Rabbit):
-    #        self.meet_rabit(agent)
-    #    if isinstance(agent, Wolf):
-    #        self.meet_wolf(agent)
-    #    if isinstance(agent, Plant):
-    #        self.meet_plant(agent)
-
     def random_velocity(self):
         x = random.random() - 0.5
         z = random.random() - 0.5
         return breve.vector(x, 0.0, z)
 
-    def go(self, vector):
-        vector = vector / breve.length(vector)
+    def go(self, vector, speed):
+        if vector is None:
+            self.setVelocity(breve.vector(0, 0, 0))
+            return
+
         vector[1] = 0.0
-        self.setVelocity(vector / 5.0)
+
+        length = breve.length(vector)
+        if length < 0.01:
+            self.setVelocity(vector * speed)
+            return
+
+        vector = vector / length
+        self.setVelocity(vector * speed)
 
     def update_energy(self, energy_change):
-        energy = max(self.energy + energy_change, 0)
+        energy = min(max(self.energy + energy_change, 0), Animal.MAXENERGY)
         self.energy = energy
-        if self.energy < 20 and energy_change < 0:
-            self.update_health(self.health - max((20 - self.energy) * self.health / 20, 0.5))
-        elif self.health < Animal.MAXHEALTH and energy_change > 0:
-            self.update_health(self.health + energy_change / 2)
+        self.update_label()
 
-    def update_health(self, health):
-        health = min(max(health, 0), Animal.MAXHEALTH)
+    def update_health(self, health_change):
+        health = min(max(self.health + health_change, 0), Animal.MAXHEALTH)
         self.health = health
-        print health
-        self.setLabel(str(int(self.health)))
+        self.update_label()
+
+    def update_label(self):
+        self.setLabel("h: %d | e: %d" % (self.health, self.energy))
+
 
 class Rabbit(Animal):
+
+    SPEED = 0.2
 
     def __init__(self):
         super(Rabbit, self).__init__()
 
-        self.last_v_update = 0
+        self.next_v_update = 0
 
         self.setColor(breve.vector(0.9, 0.9, 0.9))
 
@@ -155,17 +169,25 @@ class Rabbit(Animal):
             to_plant = plant.getLocation() - self.getLocation()
             if closest is None or breve.length(closest) > breve.length(to_plant):
                 closest = to_plant
-        return closest / breve.length(closest)
+        return closest
 
     def meet_plant(self, plant):
-        self.update_energy(plant.energy)
-        plant.energy = 0
+        RabbitPlantMeeting(self, plant)
 
     def see_rabbits(self, rabbits):
-        pass
+        if not rabbits:
+            return None
+
+        if self.energy < 80 or self.get_age() < 15.0:
+            return None
+
+        #TODO: wybrac 1 krolika, drugi krolik musi potwierdzic chec :P
+        rabbit = random.choice(rabbits)
+        to_rabbit = rabbit.getLocation() - self.getLocation()
+        return to_rabbit
 
     def meet_rabbit(self, rabbit):
-        pass
+        RabbitRabbitMeeting(self, rabbit)
 
     def see_wolfs(self, wolfs):
         if not wolfs:
@@ -178,41 +200,42 @@ class Rabbit(Animal):
         avg = sum / len(wolfs)
         return avg / breve.length(avg)
 
-    def meet_wolf(self, wolf):
-        energy_change = min(wolf.energy * 0.6, self.energy)
-        if self.energy > 0:
-            change_ratio = energy_change / self.energy
-        else:
-            change_ratio = 0
-        self.update_health(self.health * (1 - change_ratio))
-        self.update_energy(-energy_change)
-        wolf.update_energy(energy_change)
-
     def iterate(self):
-        if time.time() - self.last_v_update > 1.5:
-            self.last_v_update = time.time()
+        super(Rabbit, self).iterate()
+
+        if self.health < 0.01:
+            self.go(None)
+            return  # rabbit died
+
+        if self.next_v_update < time.time():
+            self.next_v_update = time.time() + random.random()*3.0 + 1.0
             self.go(self.random_velocity())
 
-        self.update_energy(Animal.MOVE);
+        self.update_energy(-2.0 * self.time_diff);
         rabbits, wolfs, plants = self.process_neighbors()
         go_eat = self.see_plants(plants)
-        self.see_rabbits(rabbits)
+        go_rabbit = self.see_rabbits(rabbits)
         run_away = self.see_wolfs(wolfs)
 
         if run_away:
             self.go(run_away)
-        elif go_eat:
+        elif self.energy < 80 and go_eat:
             self.go(go_eat)
+        elif go_rabbit:
+            self.go(go_rabbit)
 
-        super(Rabbit, self).iterate()
+    def go(self, vector):
+        super(Rabbit, self).go(vector, Rabbit.SPEED)
 
 
 class Wolf(Animal):
 
+    SPEED = 0.3
+
     def __init__(self):
         super(Wolf, self).__init__()
 
-        self.last_v_update = 0
+        self.next_v_update = 0
 
         self.setColor(breve.vector(0.2, 0.2, 0.2))
 
@@ -231,32 +254,32 @@ class Wolf(Animal):
             to_rabbit = rabbit.getLocation() - self.getLocation()
             if closest is None or breve.length(closest) > breve.length(to_rabbit):
                 closest = to_rabbit
-        return closest / breve.length(closest)
+        return closest
 
     def meet_rabbit(self, rabbit):
-        energy_change = min(self.energy * 0.6, rabbit.energy)
-        if rabbit.energy > 0:
-            change_ratio = energy_change / rabbit.energy
-        else:
-            change_ratio = 0
-        rabbit.update_health(rabbit.health * (1 - change_ratio))
-        rabbit.update_energy(-energy_change)
-        self.update_energy(energy_change)
+        WolfRabbitMeeting(self, rabbit)
 
     def iterate(self):
-        if time.time() - self.last_v_update > 1.5:
-            self.last_v_update = time.time()
+        super(Wolf, self).iterate()
+
+        if self.health < 0.01:
+            self.go(None)
+            return  # wolf died
+
+        if self.next_v_update < time.time():
+            self.next_v_update = time.time() + random.random()*3.0 + 1.0
             self.go(self.random_velocity())
 
-        self.update_energy(Animal.MOVE);
+        self.update_energy(-2.0 * self.time_diff);
         rabbits, wolfs, _ = self.process_neighbors()
         chase = self.see_rabbits(rabbits)
         self.see_wolfs(wolfs)
 
-        if chase:
+        if self.energy < 80 and chase:
             self.go(chase)
 
-        super(Wolf, self).iterate()
+    def go(self, vector):
+        super(Wolf, self).go(vector, Wolf.SPEED)
 
 
 breve.Animal = Animal

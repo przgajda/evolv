@@ -9,9 +9,12 @@ import random
 from controls.environ import Environ
 
 
+environment = None
+
+
 def main():
     random.seed(time.time())
-    
+
     global environment
     environment = Environ()
     environment.build()
