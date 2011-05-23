@@ -12,10 +12,12 @@ from breve import Sphere
 
 class Plant(Stationary):
 
-    MAXENERGY = 50
+    MAXENERGY = 100
 
     def __init__(self):
         super(Plant, self).__init__()
+
+        print "New plant"
 
         self.size = 0
         self.energy = random.randint(Plant.MAXENERGY / 2, Plant.MAXENERGY)
