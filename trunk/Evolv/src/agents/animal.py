@@ -13,6 +13,7 @@ from breve import Sphere
 from agents.genetics import Phenotype, Gene
 from agents.plant import Plant
 from meeting import RabbitPlantMeeting, WolfRabbitMeeting, RabbitRabbitMeeting
+from agents.meeting import WolfWolfMeeting
 
 
 class Animal(Mobile):
@@ -34,6 +35,7 @@ class Animal(Mobile):
         self.energy = Animal.MAXENERGY
         self.health = Animal.MAXHEALTH
         self.born_time = time.time()
+        self.generation = 1
 
         #self.showNeighborLines()
         self.setNeighborhoodSize(Rabbit.NEIGHBORHOOD)
@@ -46,6 +48,10 @@ class Animal(Mobile):
     def initWith(self, genotype):
         self.genotype = genotype
         self.phenotype = Phenotype.from_genotype(genotype)
+
+        print "Animal inited (generation: %d)" % self.generation
+        print self.genotype
+        print self.phenotype
 
         size_value = self.genotype.get_gene('size').get_value()
         self.size = 0.2 + (size_value - Gene.MIN + 0.1) / (Gene.MAX * 10.0)
@@ -76,9 +82,9 @@ class Animal(Mobile):
         self.check_location()
 
         if self.energy < 20:
-            self.update_health(-self.time_diff)
+            self.update_health(-self.time_diff * 3.0)
         if self.energy > 50:
-            self.update_health(3.0 * self.time_diff)
+            self.update_health(self.time_diff * 5.0)
 
     def check_location(self):
         from controls.environ import Environ
@@ -120,10 +126,13 @@ class Animal(Mobile):
         z = random.random() - 0.5
         return breve.vector(x, 0.0, z)
 
-    def go(self, vector, speed):
+    def go(self, vector):
         if vector is None:
             self.setVelocity(breve.vector(0, 0, 0))
             return
+
+        speed = self.phenotype.get_phene('speed').get_value()
+        speed = max((2.0 + speed) / 5.0, 0.02)
 
         vector[1] = 0.0
 
@@ -151,10 +160,10 @@ class Animal(Mobile):
 
 class Rabbit(Animal):
 
-    SPEED = 0.2
-
     def __init__(self):
         super(Rabbit, self).__init__()
+
+        print "New rabbit"
 
         self.next_v_update = 0
 
@@ -178,7 +187,7 @@ class Rabbit(Animal):
         if not rabbits:
             return None
 
-        if self.energy < 80 or self.get_age() < 15.0:
+        if self.energy < 60 or self.get_age() < 10.0:
             return None
 
         #TODO: wybrac 1 krolika, drugi krolik musi potwierdzic chec :P
@@ -211,7 +220,7 @@ class Rabbit(Animal):
             self.next_v_update = time.time() + random.random()*3.0 + 1.0
             self.go(self.random_velocity())
 
-        self.update_energy(-2.0 * self.time_diff);
+        self.update_energy(-4.0 * self.time_diff);
         rabbits, wolfs, plants = self.process_neighbors()
         go_eat = self.see_plants(plants)
         go_rabbit = self.see_rabbits(rabbits)
@@ -224,26 +233,32 @@ class Rabbit(Animal):
         elif go_rabbit:
             self.go(go_rabbit)
 
-    def go(self, vector):
-        super(Rabbit, self).go(vector, Rabbit.SPEED)
-
 
 class Wolf(Animal):
 
-    SPEED = 0.3
-
     def __init__(self):
         super(Wolf, self).__init__()
+
+        print "New wolf"
 
         self.next_v_update = 0
 
         self.setColor(breve.vector(0.2, 0.2, 0.2))
 
     def see_wolfs(self, wolfs):
-        pass
+        if not wolfs:
+            return None
 
-    def meet_wolf(self, rabbit):
-        pass
+        if self.energy < 60 or self.get_age() < 25.0:
+            return None
+
+        #TODO: wybrac 1 krolika, drugi krolik musi potwierdzic chec :P
+        wolf = random.choice(wolfs)
+        to_wolf = wolf.getLocation() - self.getLocation()
+        return to_wolf
+
+    def meet_wolf(self, wolf):
+        WolfWolfMeeting(self, wolf)
 
     def see_rabbits(self, rabbits):
         if not rabbits:
@@ -277,9 +292,6 @@ class Wolf(Animal):
 
         if self.energy < 80 and chase:
             self.go(chase)
-
-    def go(self, vector):
-        super(Wolf, self).go(vector, Wolf.SPEED)
 
 
 breve.Animal = Animal
