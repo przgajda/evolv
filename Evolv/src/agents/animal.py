@@ -14,13 +14,15 @@ from agents.genetics import Phenotype, Gene
 from agents.plant import Plant
 from meeting import RabbitPlantMeeting, WolfRabbitMeeting, RabbitRabbitMeeting
 from agents.meeting import WolfWolfMeeting
+import re
 
 
 class Animal(Mobile):
 
-    NEIGHBORHOOD = 5
+    NEIGHBORHOOD = 10
     MAXHEALTH = 100
     MAXENERGY = 100
+    MAXFAT = 70
 
     def __init__(self):
         super(Animal, self).__init__()
@@ -34,8 +36,10 @@ class Animal(Mobile):
         self.size = 0
         self.energy = Animal.MAXENERGY
         self.health = Animal.MAXHEALTH
+        self.fat = Animal.MAXFAT
         self.born_time = time.time()
         self.generation = 1
+        self.v_vector = None
 
         #self.showNeighborLines()
         self.setNeighborhoodSize(Rabbit.NEIGHBORHOOD)
@@ -79,10 +83,13 @@ class Animal(Mobile):
         self.time_diff = time.time() - self.last_iter
         self.last_iter = time.time()
 
+        if self.v_vector is not None:
+            self.move(self.getLocation() + self.v_vector * self.time_diff)
+
         self.check_location()
 
-        if self.energy < 20:
-            self.update_health(-self.time_diff * 3.0)
+        if self.energy < 10:
+            self.update_health(-self.time_diff * 2.0)
         if self.energy > 50:
             self.update_health(self.time_diff * 5.0)
 
@@ -128,31 +135,40 @@ class Animal(Mobile):
 
     def go(self, vector):
         if vector is None:
-            self.setVelocity(breve.vector(0, 0, 0))
+            self.v_vector = None
+            #self.setVelocity(breve.vector(0, 0, 0))
             return
 
         speed = self.phenotype.get_phene('speed').get_value()
-        speed = max((2.0 + speed) / 5.0, 0.02)
+        speed = max((2.0 + speed) / 3.0, 0.01)
 
         vector[1] = 0.0
 
         length = breve.length(vector)
-        if length < 0.01:
-            self.setVelocity(vector * speed)
-            return
+        if length > 0.001:
+            vector = vector / length
 
-        vector = vector / length
-        self.setVelocity(vector * speed)
+        self.v_vector = vector * speed
 
     def update_energy(self, energy_change):
         energy = min(max(self.energy + energy_change, 0), Animal.MAXENERGY)
+        diff = self.energy - energy
         self.energy = energy
         self.update_label()
+        return diff
 
     def update_health(self, health_change):
         health = min(max(self.health + health_change, 0), Animal.MAXHEALTH)
+        diff = self.health - health
         self.health = health
         self.update_label()
+        return diff
+
+    def update_fat(self, fat_change):
+        fat = min(max(self.fat + fat_change, 0), Animal.MAXFAT)
+        diff = self.fat - fat
+        self.fat = fat
+        return diff
 
     def update_label(self):
         self.setLabel("h: %d | e: %d" % (self.health, self.energy))
@@ -160,12 +176,15 @@ class Animal(Mobile):
 
 class Rabbit(Animal):
 
+    MAX_AGE = 60.0
+
     def __init__(self):
         super(Rabbit, self).__init__()
 
         print "New rabbit"
 
         self.next_v_update = 0
+        self.die_at_age = random.randint(int(Rabbit.MAX_AGE * 0.7), int(Rabbit.MAX_AGE * 1.3))
 
         self.setColor(breve.vector(0.9, 0.9, 0.9))
 
@@ -217,10 +236,10 @@ class Rabbit(Animal):
             return  # rabbit died
 
         if self.next_v_update < time.time():
-            self.next_v_update = time.time() + random.random()*3.0 + 1.0
+            self.next_v_update = time.time() + random.random()*5.0 + 1.0
             self.go(self.random_velocity())
 
-        self.update_energy(-3.0 * self.time_diff);
+        self.update_energy(-2.0 * self.time_diff);
         rabbits, wolfs, plants = self.process_neighbors()
         go_eat = self.see_plants(plants)
         go_rabbit = self.see_rabbits(rabbits)
@@ -236,12 +255,16 @@ class Rabbit(Animal):
 
 class Wolf(Animal):
 
+    MAX_AGE = 80.0
+
     def __init__(self):
         super(Wolf, self).__init__()
 
         print "New wolf"
 
         self.next_v_update = 0
+
+        self.die_at_age = random.randint(int(Wolf.MAX_AGE * 0.7), int(Wolf.MAX_AGE * 1.3))
 
         self.setColor(breve.vector(0.2, 0.2, 0.2))
 
@@ -282,16 +305,18 @@ class Wolf(Animal):
             return  # wolf died
 
         if self.next_v_update < time.time():
-            self.next_v_update = time.time() + random.random()*3.0 + 1.0
+            self.next_v_update = time.time() + random.random()*8.0 + 1.0
             self.go(self.random_velocity())
 
         self.update_energy(-2.0 * self.time_diff);
         rabbits, wolfs, _ = self.process_neighbors()
         chase = self.see_rabbits(rabbits)
-        self.see_wolfs(wolfs)
+        go_wolf = self.see_wolfs(wolfs)
 
         if self.energy < 80 and chase:
             self.go(chase)
+        elif go_wolf:
+            self.go(go_wolf)
 
 
 breve.Animal = Animal
