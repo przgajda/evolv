@@ -4,6 +4,7 @@ Created on 2011-05-21
 @author: quermit
 '''
 import time
+import random
 
 
 class Meeting(object):
@@ -29,7 +30,7 @@ class RabbitPlantMeeting(Meeting):
             return
 
         time_diff = time.time() - last_info['time']
-        energy_diff = time_diff * 10  # eating speed
+        energy_diff = time_diff * 40  # eating speed
         eaten = plant.update_energy(-energy_diff)
         rabbit.update_energy(+eaten)
 
@@ -62,7 +63,7 @@ class RabbitRabbitMeeting(Meeting):
         if last_info is None:
             return 0
 
-        if rabbit1.get_age() < 8.0 or rabbit2.get_age() < 8.0:
+        if rabbit1.get_age() < 15.0 or rabbit2.get_age() < 15.0:
             return 0
 
         if rabbit1.health < 20.0 or rabbit2.health < 20.0:
@@ -74,10 +75,11 @@ class RabbitRabbitMeeting(Meeting):
         res = last_info['result']
         time_diff = time.time() - res
 
-        if time_diff > 2.0:
-            rabbit1.update_energy(-10.0)
-            rabbit2.update_energy(-10.0)
-            environment.born_rabbit(rabbit1, rabbit2)
+        if time_diff > 10.0:
+            rabbit1.update_energy(-15.0)
+            rabbit2.update_energy(-15.0)
+            for _ in range(random.randint(1, 5)):
+                environment.born_rabbit(rabbit1, rabbit2)
             return time.time()
         else:
             return res
@@ -92,7 +94,7 @@ class WolfWolfMeeting(Meeting):
         if last_info is None:
             return 0
 
-        if wolf1.get_age() < 25.0 or wolf2.get_age() < 25.0:
+        if wolf1.get_age() < 30.0 or wolf2.get_age() < 30.0:
             return 0
 
         if wolf1.health < 20.0 or wolf2.health < 20.0:
@@ -104,10 +106,11 @@ class WolfWolfMeeting(Meeting):
         res = last_info['result']
         time_diff = time.time() - res
 
-        if time_diff > 10.0:
-            wolf1.update_energy(-25.0)
-            wolf2.update_energy(-25.0)
-            environment.born_wolf(wolf1, wolf2)
+        if time_diff > 15.0:
+            wolf1.update_energy(-30.0)
+            wolf2.update_energy(-30.0)
+            for _ in range(random.randint(1, 3)):
+                environment.born_wolf(wolf1, wolf2)
             return time.time()
         else:
             return res
