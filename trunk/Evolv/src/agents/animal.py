@@ -14,7 +14,6 @@ from agents.genetics import Phenotype, Gene
 from agents.plant import Plant
 from meeting import RabbitPlantMeeting, WolfRabbitMeeting, RabbitRabbitMeeting
 from agents.meeting import WolfWolfMeeting
-import re
 
 
 class Animal(Mobile):
@@ -140,7 +139,7 @@ class Animal(Mobile):
             return
 
         speed = self.phenotype.get_phene('speed').get_value()
-        speed = max((2.0 + speed) / 3.0, 0.01)
+        speed = max((2.0 + speed) / 2.0, 0.01)
 
         vector[1] = 0.0
 
@@ -171,7 +170,8 @@ class Animal(Mobile):
         return diff
 
     def update_label(self):
-        self.setLabel("h: %d | e: %d" % (self.health, self.energy))
+        pass
+        #self.setLabel("h: %d | e: %d" % (self.health, self.energy))
 
 
 class Rabbit(Animal):
@@ -206,11 +206,11 @@ class Rabbit(Animal):
         if not rabbits:
             return None
 
-        if self.energy < 60.0 or self.get_age() < 8.0:
+        if self.energy < 60.0 or self.get_age() < 15.0:
             return None
 
         #TODO: wybrac 1 krolika, drugi krolik musi potwierdzic chec :P
-        rabbit = random.choice(rabbits)
+        rabbit = rabbits[0]
         to_rabbit = rabbit.getLocation() - self.getLocation()
         return to_rabbit
 
@@ -255,7 +255,7 @@ class Rabbit(Animal):
 
 class Wolf(Animal):
 
-    MAX_AGE = 80.0
+    MAX_AGE = 90.0
 
     def __init__(self):
         super(Wolf, self).__init__()
@@ -272,11 +272,11 @@ class Wolf(Animal):
         if not wolfs:
             return None
 
-        if self.energy < 60 or self.get_age() < 25.0:
+        if self.energy < 60 or self.get_age() < 30.0:
             return None
 
         #TODO: wybrac 1 krolika, drugi krolik musi potwierdzic chec :P
-        wolf = random.choice(wolfs)
+        wolf = wolfs[0]
         to_wolf = wolf.getLocation() - self.getLocation()
         return to_wolf
 

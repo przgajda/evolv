@@ -76,33 +76,36 @@ class Environ(Control):
 
         if self.next_plant_born < time.time():
             self.bord_plant()
-            self.next_plant_born = time.time() + random.random()*2.0 + 1.0
+            self.next_plant_born = time.time() + random.random()*3.0 + 2.0
 
-        for plant in self.plants:
-            if plant.energy < 0.01:
-                print "Plant eaten"
-                self.plants.remove(plant)
-                breve.deleteInstance(plant)
+        try:
+            for plant in self.plants:
+                if plant.energy < 0.01:
+                    print "Plant eaten"
+                    self.plants.remove(plant)
+                    breve.deleteInstance(plant)
 
-        for rabbit in self.rabbits:
-            if rabbit.fat < 0.01:
-                print "Rabbit eaten"
-                self.rabbits.remove(rabbit)
-                breve.deleteInstance(rabbit)
-            if rabbit.get_age() > rabbit.die_at_age:
-                print "Rabbit died"
-                self.rabbits.remove(rabbit)
-                breve.deleteInstance(rabbit)
+            for rabbit in self.rabbits:
+                if rabbit.fat < 0.01:
+                    print "Rabbit eaten"
+                    self.rabbits.remove(rabbit)
+                    breve.deleteInstance(rabbit)
+                if rabbit.get_age() > rabbit.die_at_age:
+                    print "Rabbit died"
+                    self.rabbits.remove(rabbit)
+                    breve.deleteInstance(rabbit)
 
-        for wolf in self.wolves:
-            if wolf.health < 0.01:
-                print "Wolf eaten"
-                self.wolves.remove(wolf)
-                breve.deleteInstance(wolf)
-            if wolf.get_age() > wolf.die_at_age:
-                print "Wolf died"
-                self.wolves.remove(wolf)
-                breve.deleteInstance(wolf)
+            for wolf in self.wolves:
+                if wolf.health < 0.01:
+                    print "Wolf eaten"
+                    self.wolves.remove(wolf)
+                    breve.deleteInstance(wolf)
+                if wolf.get_age() > wolf.die_at_age:
+                    print "Wolf died"
+                    self.wolves.remove(wolf)
+                    breve.deleteInstance(wolf)
+        except Exception, e:
+            print "ERROR: %s" % e
 
         self.updateNeighbors()
 
