@@ -30,8 +30,8 @@ class RabbitPlantMeeting(Meeting):
 
         time_diff = time.time() - last_info['time']
         energy_diff = time_diff * 10  # eating speed
-        rabbit.update_energy(+energy_diff)
-        plant.update_energy(-energy_diff)
+        eaten = plant.update_energy(-energy_diff)
+        rabbit.update_energy(+eaten)
 
 
 class WolfRabbitMeeting(Meeting):
@@ -45,11 +45,12 @@ class WolfRabbitMeeting(Meeting):
         if rabbit.health > 0.01:
             health_diff = time_diff * 30  # attack power
             rabbit.update_health(-health_diff)
-            wolf.update_energy(+health_diff)
         else:
             energy_diff = time_diff * 10  # eating speed
-            wolf.update_energy(+energy_diff)
-            rabbit.update_energy(-energy_diff)
+            eaten = rabbit.update_energy(-energy_diff)
+            wolf.update_energy(+eaten)
+            eaten = rabbit.update_fat(-energy_diff)
+            wolf.update_energy(+eaten)
 
 
 class RabbitRabbitMeeting(Meeting):

@@ -85,14 +85,22 @@ class Environ(Control):
                 breve.deleteInstance(plant)
 
         for rabbit in self.rabbits:
-            if rabbit.health < 0.01 and rabbit.energy < 0.01:
+            if rabbit.fat < 0.01:
                 print "Rabbit eaten"
+                self.rabbits.remove(rabbit)
+                breve.deleteInstance(rabbit)
+            if rabbit.get_age() > rabbit.die_at_age:
+                print "Rabbit died"
                 self.rabbits.remove(rabbit)
                 breve.deleteInstance(rabbit)
 
         for wolf in self.wolves:
             if wolf.health < 0.01:
                 print "Wolf eaten"
+                self.wolves.remove(wolf)
+                breve.deleteInstance(wolf)
+            if wolf.get_age() > wolf.die_at_age:
+                print "Wolf died"
                 self.wolves.remove(wolf)
                 breve.deleteInstance(wolf)
 

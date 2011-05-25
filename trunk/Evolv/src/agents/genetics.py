@@ -198,7 +198,7 @@ def create_rabbit_genotype():
     g.get_gene('size').set_value(-2.0 + randsalt())
     g.get_gene('ears').set_value(4.0 + randsalt())
     g.get_gene('legs').set_value(1.0 + randsalt())
-    g.get_gene('fur').set_value(2.0 + randsalt())
+    g.get_gene('fur').set_value(3.0 + randsalt())
     g.get_gene('eyes').set_value(1.0 + randsalt())
     return g
 
@@ -207,7 +207,7 @@ def create_wolf_genotype():
     g = create_simple_genotype()
     g.get_gene('size').set_value(4.0 + randsalt())
     g.get_gene('ears').set_value(1.0 + randsalt())
-    g.get_gene('legs').set_value(3.0 + randsalt())
+    g.get_gene('legs').set_value(4.0 + randsalt())
     g.get_gene('fur').set_value(2.0 + randsalt())
     g.get_gene('eyes').set_value(1.0 + randsalt())
     return g

@@ -33,7 +33,9 @@ class Plant(Stationary):
 
     def update_energy(self, energy_change):
         energy = min(max(self.energy + energy_change, 0), Plant.MAXENERGY)
+        diff = self.energy - energy
         self.energy = energy
+        return diff
 
 
 breve.Plant = Plant
