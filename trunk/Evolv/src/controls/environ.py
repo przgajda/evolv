@@ -76,7 +76,7 @@ class Environ(Control):
 
         if self.next_plant_born < time.time():
             self.bord_plant()
-            self.next_plant_born = time.time() + random.random()*5.0 + 2.0
+            self.next_plant_born = time.time() + random.random()*2.0 + 1.0
 
         for plant in self.plants:
             if plant.energy < 0.01:

@@ -187,7 +187,7 @@ class Rabbit(Animal):
         if not rabbits:
             return None
 
-        if self.energy < 60 or self.get_age() < 10.0:
+        if self.energy < 60.0 or self.get_age() < 8.0:
             return None
 
         #TODO: wybrac 1 krolika, drugi krolik musi potwierdzic chec :P
@@ -220,7 +220,7 @@ class Rabbit(Animal):
             self.next_v_update = time.time() + random.random()*3.0 + 1.0
             self.go(self.random_velocity())
 
-        self.update_energy(-4.0 * self.time_diff);
+        self.update_energy(-3.0 * self.time_diff);
         rabbits, wolfs, plants = self.process_neighbors()
         go_eat = self.see_plants(plants)
         go_rabbit = self.see_rabbits(rabbits)
