@@ -12,6 +12,7 @@ from breve import Control
 from agents.animal import Rabbit, Wolf
 from agents.genetics import create_rabbit_genotype, create_wolf_genotype, Genotype
 from agents.plant import Plant
+from controls.chart import PhenotypeLog
 
 
 class Environ(Control):
@@ -57,19 +58,19 @@ class Environ(Control):
         for rabbit in rabbits:
             rabbit.initWith(create_rabbit_genotype())
             rabbit.move(self.get_birthplace(rabbit.size))
-        self.rabbits.extend(rabbits)
+            self.__on_new_rabit(rabbit)
 
         wolves = breve.createInstances(Wolf, 10)
         for wolf in wolves:
             wolf.initWith(create_wolf_genotype())
             wolf.move(self.get_birthplace(wolf.size))
-        self.wolves.extend(wolves)
+            self.__on_new_wolf(wolf)
 
         plants = breve.createInstances(Plant, 30)
         for plant in plants:
             plant.initWith()
             plant.move(self.get_birthplace(plant.size))
-        self.plants.extend(plants)
+            self.__on_new_plant(plant)
 
     def iterate(self):
         super(Environ, self).iterate()
@@ -118,7 +119,8 @@ class Environ(Control):
         wolf.generation = max(wolf1.generation, wolf2.generation) + 1
         wolf.initWith(genotype)
         wolf.move(wolf1.getLocation())
-        self.wolves.append(wolf)
+
+        self.__on_new_wolf(wolf)
 
     def born_rabbit(self, rabbit1, rabbit2):
         g1 = rabbit1.genotype
@@ -132,12 +134,25 @@ class Environ(Control):
         rabbit.generation = max(rabbit1.generation, rabbit2.generation) + 1
         rabbit.initWith(genotype)
         rabbit.move(rabbit1.getLocation())
-        self.rabbits.append(rabbit)
+
+        self.__on_new_rabit(rabbit)
 
     def bord_plant(self):
         plant = breve.createInstances(Plant, 1)
         plant.initWith()
         plant.move(self.get_birthplace(plant.size))
+
+        self.__on_new_plant(plant)
+
+    def __on_new_plant(self, plant):
         self.plants.append(plant)
+
+    def __on_new_rabit(self, rabbit):
+        self.rabbits.append(rabbit)
+        PhenotypeLog.append('rabbit', rabbit.generation, rabbit.phenotype)
+
+    def __on_new_wolf(self, wolf):
+        self.wolves.append(wolf)
+        PhenotypeLog.append('wolf', wolf.generation, wolf.phenotype)
 
 
