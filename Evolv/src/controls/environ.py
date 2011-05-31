@@ -12,10 +12,15 @@ from breve import Control
 from agents.animal import Rabbit, Wolf
 from agents.genetics import create_rabbit_genotype, create_wolf_genotype, Genotype
 from agents.plant import Plant
+from agents.teritory import Meadow
 from controls.chart import PhenotypeLog
 
 
 class Environ(Control):
+
+    MAX_WOLVES = 20
+    MAX_RABBITS = 60
+
 
     Y = 0.0
     SIZE = 40.0
@@ -38,6 +43,7 @@ class Environ(Control):
         self.plants = []
         self.rabbits = []
         self.wolves = []
+        self.teritories = []
         self.rabbit_genotypes = []
         self.wolf_genotypes = []
 
@@ -71,6 +77,32 @@ class Environ(Control):
             plant.initWith()
             plant.move(self.get_birthplace(plant.size))
             self.__on_new_plant(plant)
+
+        meadow = breve.createInstances(Meadow, 1)
+        meadow.initWith(20.0)
+        meadow.move(breve.vector(self.SIZE / 2, -0.1, self.SIZE / 2))
+        self.teritories.append(meadow)
+
+        meadow = breve.createInstances(Meadow, 1)
+        meadow.initWith(20.0)
+        meadow.move(breve.vector(-self.SIZE / 2, -0.1, -self.SIZE / 2))
+        self.teritories.append(meadow)
+
+        meadow = breve.createInstances(Meadow, 1)
+        meadow.initWith(20.0)
+        meadow.move(breve.vector(self.SIZE / 2, -0.1, -self.SIZE / 2))
+        self.teritories.append(meadow)
+
+        meadow = breve.createInstances(Meadow, 1)
+        meadow.initWith(10.0)
+        meadow.move(breve.vector(-self.SIZE / 2, -0.1, self.SIZE / 2))
+        self.teritories.append(meadow)
+#
+#        meadow = breve.createInstances(Meadow, 1)
+#        meadow.initWith(15.0)
+#        meadow.move(breve.vector(0, -0.1, 0))
+#        self.teritories.append(meadow)
+
 
     def iterate(self):
         super(Environ, self).iterate()
@@ -111,6 +143,10 @@ class Environ(Control):
         self.updateNeighbors()
 
     def born_wolf(self, wolf1, wolf2):
+        print "wolves #: %d" % len(self.wolves)
+        if len(self.wolves) >= Environ.MAX_WOLVES:
+            return
+
         genotype = Genotype.npoint_crossover(3, wolf1.genotype, wolf2.genotype)
         genotype = Genotype.npoint_random_mutation(2, genotype)
         self.wolf_genotypes.append(genotype)
@@ -123,6 +159,10 @@ class Environ(Control):
         self.__on_new_wolf(wolf)
 
     def born_rabbit(self, rabbit1, rabbit2):
+        print "rabbits #: %d" % len(self.rabbits)
+        if len(self.rabbits) >= Environ.MAX_RABBITS:
+            return
+
         g1 = rabbit1.genotype
         g2 = rabbit2.genotype
 

@@ -94,7 +94,7 @@ class WolfWolfMeeting(Meeting):
         if last_info is None:
             return 0
 
-        if wolf1.get_age() < 30.0 or wolf2.get_age() < 30.0:
+        if wolf1.get_age() < 25.0 or wolf2.get_age() < 25.0:
             return 0
 
         if wolf1.health < 20.0 or wolf2.health < 20.0:
@@ -106,9 +106,9 @@ class WolfWolfMeeting(Meeting):
         res = last_info['result']
         time_diff = time.time() - res
 
-        if time_diff > 15.0:
-            wolf1.update_energy(-30.0)
-            wolf2.update_energy(-30.0)
+        if time_diff > 10.0:
+            wolf1.update_energy(-20.0)
+            wolf2.update_energy(-20.0)
             for _ in range(random.randint(1, 3)):
                 environment.born_wolf(wolf1, wolf2)
             return time.time()
