@@ -14,6 +14,7 @@ from agents.genetics import Phenotype, Gene
 from agents.plant import Plant
 from meeting import RabbitPlantMeeting, WolfRabbitMeeting, RabbitRabbitMeeting
 from agents.meeting import WolfWolfMeeting
+from agents.teritory import Meadow
 
 
 class Animal(Mobile):
@@ -39,6 +40,7 @@ class Animal(Mobile):
         self.born_time = time.time()
         self.generation = 1
         self.v_vector = None
+        self.on_meadow = False
 
         #self.showNeighborLines()
         self.setNeighborhoodSize(Rabbit.NEIGHBORHOOD)
@@ -46,6 +48,8 @@ class Animal(Mobile):
         self.handleCollisions('Plant', 'meet_plant')
         self.handleCollisions('Rabbit', 'meet_rabbit')
         self.handleCollisions('Wolf', 'meet_wolf')
+        self.handleCollisions('Meadow', '_on_meadow')
+
         self.update_health(self.health)
 
     def initWith(self, genotype):
@@ -74,6 +78,9 @@ class Animal(Mobile):
         pass
 
     def meet_wolf(self, rabbit):
+        pass
+
+    def _on_meadow(self, meadow):
         pass
 
     def iterate(self):
@@ -118,6 +125,7 @@ class Animal(Mobile):
         rabbits = []
         wolfs = []
         plants = []
+        self.on_meadow = False
         for agent in neighbors:
             if isinstance(agent, Rabbit):
                 rabbits.append(agent)
@@ -125,6 +133,9 @@ class Animal(Mobile):
                 wolfs.append(agent)
             if isinstance(agent, Plant):
                 plants.append(agent)
+            if isinstance(agent, Meadow):
+                self.on_meadow = True
+
         return rabbits, wolfs, plants
 
     def random_velocity(self):
@@ -272,7 +283,7 @@ class Wolf(Animal):
         if not wolfs:
             return None
 
-        if self.energy < 60 or self.get_age() < 30.0:
+        if self.energy < 60 or self.get_age() < 25.0:
             return None
 
         #TODO: wybrac 1 krolika, drugi krolik musi potwierdzic chec :P
@@ -284,6 +295,8 @@ class Wolf(Animal):
         WolfWolfMeeting(self, wolf)
 
     def see_rabbits(self, rabbits):
+        rabbits = [rabbit for rabbit in rabbits if not rabbit.on_meadow]
+
         if not rabbits:
             return None
 
@@ -312,6 +325,10 @@ class Wolf(Animal):
         rabbits, wolfs, _ = self.process_neighbors()
         chase = self.see_rabbits(rabbits)
         go_wolf = self.see_wolfs(wolfs)
+
+        if self.on_meadow:
+            self.go(-self.getLocation())
+            return
 
         if self.energy < 80 and chase:
             self.go(chase)
