@@ -40,7 +40,11 @@ class Animal(Mobile):
         self.born_time = time.time()
         self.generation = 1
         self.v_vector = None
+        self.on_meadow_time = 0
         self.on_meadow = False
+
+        self.on_forest_time = 0
+        self.on_forest = False
 
         #self.showNeighborLines()
         self.setNeighborhoodSize(Rabbit.NEIGHBORHOOD)
@@ -49,6 +53,7 @@ class Animal(Mobile):
         self.handleCollisions('Rabbit', 'meet_rabbit')
         self.handleCollisions('Wolf', 'meet_wolf')
         self.handleCollisions('Meadow', '_on_meadow')
+        self.handleCollisions('Forest', '_on_forest')
 
         self.update_health(self.health)
 
@@ -81,10 +86,16 @@ class Animal(Mobile):
         pass
 
     def _on_meadow(self, meadow):
-        pass
+        self.on_meadow_time = time.time()
+
+    def _on_forest(self, forest):
+        self.on_forest_time = time.time()
 
     def iterate(self):
         super(Animal, self).iterate()
+
+        self.on_meadow = (time.time() - self.on_meadow_time < 1.0)
+        self.on_forest = (time.time() - self.on_forest_time < 1.0)
 
         self.time_diff = time.time() - self.last_iter
         self.last_iter = time.time()
@@ -120,12 +131,21 @@ class Animal(Mobile):
         loc[2] = z
         self.move(loc)
 
+    def is_on_border(self):
+        from controls.environ import Environ
+
+        loc = self.getLocation()
+        x = loc[0]
+        z = loc[2]
+
+        return (x > Environ.SIZE / 2.0 - 1) or (x < -Environ.SIZE / 2.0 + 1) \
+                or (z > Environ.SIZE / 2.0 - 1) or (z < -Environ.SIZE / 2.0 + 1)
+
     def process_neighbors(self):
         neighbors = self.getNeighbors()
         rabbits = []
         wolfs = []
         plants = []
-        self.on_meadow = False
         for agent in neighbors:
             if isinstance(agent, Rabbit):
                 rabbits.append(agent)
@@ -133,8 +153,6 @@ class Animal(Mobile):
                 wolfs.append(agent)
             if isinstance(agent, Plant):
                 plants.append(agent)
-            if isinstance(agent, Meadow):
-                self.on_meadow = True
 
         return rabbits, wolfs, plants
 
@@ -151,6 +169,12 @@ class Animal(Mobile):
 
         speed = self.phenotype.get_phene('speed').get_value()
         speed = max((2.0 + speed) / 2.0, 0.01)
+
+        if self.on_forest:
+            if isinstance(self, Wolf):
+                speed = speed * 1.5
+            else:
+                speed = speed * 0.5
 
         vector[1] = 0.0
 
@@ -183,6 +207,7 @@ class Animal(Mobile):
     def update_label(self):
         pass
         #self.setLabel("h: %d | e: %d" % (self.health, self.energy))
+        #self.setLabel("%d" % self.energy)
 
 
 class Rabbit(Animal):
@@ -232,8 +257,20 @@ class Rabbit(Animal):
         if not wolfs:
             return None
 
-        sum = breve.vector(0.0, 0.0, 0.0)
+        wolfs2 = []
         for wolf in wolfs:
+            rabbit_obs = self.phenotype.get_phene('observation').get_value()
+            wolf_cam = wolf.phenotype.get_phene('camouflage').get_value()
+            thresh = max(2.0 * (rabbit_obs - wolf_cam) + 2.0, 1.0)
+            dist = breve.length(self.getLocation() - wolf.getLocation())
+            if dist < thresh and not self.on_forest:
+                wolfs2.append(wolf)
+
+        if not wolfs2:
+            return None
+
+        sum = breve.vector(0.0, 0.0, 0.0)
+        for wolf in wolfs2:
             from_wolf = self.getLocation() - wolf.getLocation()
             sum = sum + from_wolf * 1.0 / (breve.length(from_wolf) + 1.0)
         avg = sum / len(wolfs)
@@ -250,13 +287,17 @@ class Rabbit(Animal):
             self.next_v_update = time.time() + random.random()*5.0 + 1.0
             self.go(self.random_velocity())
 
+        if self.is_on_border():
+            self.next_v_update = time.time() + 1.0
+            self.go(-self.getLocation())
+
         self.update_energy(-2.0 * self.time_diff);
         rabbits, wolfs, plants = self.process_neighbors()
         go_eat = self.see_plants(plants)
         go_rabbit = self.see_rabbits(rabbits)
         run_away = self.see_wolfs(wolfs)
 
-        if run_away:
+        if run_away and not self.on_meadow:
             self.go(run_away)
         elif self.energy < 80 and go_eat:
             self.go(go_eat)
@@ -274,6 +315,7 @@ class Wolf(Animal):
         print "New wolf"
 
         self.next_v_update = 0
+        self.meet_rabbit_time = 0
 
         self.die_at_age = random.randint(int(Wolf.MAX_AGE * 0.7), int(Wolf.MAX_AGE * 1.3))
 
@@ -283,7 +325,7 @@ class Wolf(Animal):
         if not wolfs:
             return None
 
-        if self.energy < 60 or self.get_age() < 25.0:
+        if self.energy < 60 or self.get_age() < 20.0:
             return None
 
         #TODO: wybrac 1 krolika, drugi krolik musi potwierdzic chec :P
@@ -300,14 +342,30 @@ class Wolf(Animal):
         if not rabbits:
             return None
 
-        closest = None
+        rabbits2 = []
         for rabbit in rabbits:
+            rabbit_obs = self.phenotype.get_phene('observation').get_value()
+            wolf_cam = rabbit.phenotype.get_phene('camouflage').get_value()
+            thresh = max(2.0 * (rabbit_obs - wolf_cam) + 2.0, 1.0)
+            dist = breve.length(self.getLocation() - rabbit.getLocation())
+            if dist < thresh:
+                rabbits2.append(rabbit)
+
+        if not rabbits2:
+            return None
+
+        closest = None
+        for rabbit in rabbits2:
             to_rabbit = rabbit.getLocation() - self.getLocation()
             if closest is None or breve.length(closest) > breve.length(to_rabbit):
                 closest = to_rabbit
         return closest
 
     def meet_rabbit(self, rabbit):
+        if rabbit.on_meadow:
+            return
+
+        self.meet_rabbit_time = time.time()
         WolfRabbitMeeting(self, rabbit)
 
     def iterate(self):
@@ -321,16 +379,16 @@ class Wolf(Animal):
             self.next_v_update = time.time() + random.random()*8.0 + 1.0
             self.go(self.random_velocity())
 
+        if self.is_on_border():
+            self.next_v_update = time.time() + 1.0
+            self.go(-self.getLocation())
+
         self.update_energy(-2.0 * self.time_diff);
         rabbits, wolfs, _ = self.process_neighbors()
         chase = self.see_rabbits(rabbits)
         go_wolf = self.see_wolfs(wolfs)
 
-        if self.on_meadow:
-            self.go(-self.getLocation())
-            return
-
-        if self.energy < 80 and chase:
+        if (self.energy < 80 or time.time() - self.meet_rabbit_time < 1.0) and chase:
             self.go(chase)
         elif go_wolf:
             self.go(go_wolf)

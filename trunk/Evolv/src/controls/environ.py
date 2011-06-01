@@ -12,7 +12,7 @@ from breve import Control
 from agents.animal import Rabbit, Wolf
 from agents.genetics import create_rabbit_genotype, create_wolf_genotype, Genotype
 from agents.plant import Plant
-from agents.teritory import Meadow
+from agents.teritory import Meadow, Forest
 from controls.chart import PhenotypeLog
 
 
@@ -79,29 +79,39 @@ class Environ(Control):
             self.__on_new_plant(plant)
 
         meadow = breve.createInstances(Meadow, 1)
-        meadow.initWith(20.0)
-        meadow.move(breve.vector(self.SIZE / 2, -0.1, self.SIZE / 2))
-        self.teritories.append(meadow)
-
-        meadow = breve.createInstances(Meadow, 1)
-        meadow.initWith(20.0)
-        meadow.move(breve.vector(-self.SIZE / 2, -0.1, -self.SIZE / 2))
-        self.teritories.append(meadow)
-
-        meadow = breve.createInstances(Meadow, 1)
-        meadow.initWith(20.0)
-        meadow.move(breve.vector(self.SIZE / 2, -0.1, -self.SIZE / 2))
+        meadow.initWith(10.0)
+        meadow.move(breve.vector(15, -0.1, 15))
         self.teritories.append(meadow)
 
         meadow = breve.createInstances(Meadow, 1)
         meadow.initWith(10.0)
-        meadow.move(breve.vector(-self.SIZE / 2, -0.1, self.SIZE / 2))
+        meadow.move(breve.vector(-15, -0.1, -15))
         self.teritories.append(meadow)
+
+#        meadow = breve.createInstances(Meadow, 1)
+#        meadow.initWith(10.0)
+#        meadow.move(breve.vector(self.SIZE / 2, -0.1, -self.SIZE / 2))
+#        self.teritories.append(meadow)
 #
 #        meadow = breve.createInstances(Meadow, 1)
-#        meadow.initWith(15.0)
-#        meadow.move(breve.vector(0, -0.1, 0))
+#        meadow.initWith(10.0)
+#        meadow.move(breve.vector(-self.SIZE / 2, -0.1, self.SIZE / 2))
 #        self.teritories.append(meadow)
+#
+        meadow = breve.createInstances(Meadow, 1)
+        meadow.initWith(15.0)
+        meadow.move(breve.vector(-10, -0.1, 10))
+        self.teritories.append(meadow)
+
+        forest = breve.createInstances(Forest, 1)
+        forest.initWith(10.0)
+        forest.move(breve.vector(6, -0.1, -14))
+        self.teritories.append(forest)
+
+        forest = breve.createInstances(Forest, 1)
+        forest.initWith(10.0)
+        forest.move(breve.vector(12, -0.1, -4))
+        self.teritories.append(forest)
 
 
     def iterate(self):
@@ -109,7 +119,7 @@ class Environ(Control):
 
         if self.next_plant_born < time.time():
             self.bord_plant()
-            self.next_plant_born = time.time() + random.random()*3.0 + 2.0
+            self.next_plant_born = time.time() + random.random()*2.0 + 1.0
 
         try:
             for plant in self.plants:

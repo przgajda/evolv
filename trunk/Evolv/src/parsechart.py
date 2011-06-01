@@ -68,7 +68,7 @@ def main():
         chart.set_legend(['rabbits-avg', 'rabbits-min', 'rabbits-max', 'wolves-avg', 'wolves-min', 'wolves-max'])
         chart.set_grid(0, 10, 3, 3)
 
-        chart.set_axis_labels(Axis.BOTTOM, range(max_wx + 1, 5))
+        chart.set_axis_labels(Axis.BOTTOM, range(0, max_wx + 1, 5))
 
         chart.download('genetics-%s.png' % feature)
 
