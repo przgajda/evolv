@@ -109,7 +109,7 @@ class Genotype(list):
 
         for _ in range(n):
             idx = random.randint(0, len(genotype) - 1)
-            change = (random.random() - 0.5) * 2.0
+            change = (random.random() - 0.5) * 1.0
             res[idx].set_value(res[idx].get_value() + change)
 
         return res

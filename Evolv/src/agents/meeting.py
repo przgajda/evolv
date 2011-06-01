@@ -43,8 +43,12 @@ class WolfRabbitMeeting(Meeting):
 
         time_diff = time.time() - last_info['time']
 
+        rabbit_stength = rabbit.phenotype.get_phene('strength').get_value()
+        wolf_stength = wolf.phenotype.get_phene('strength').get_value()
+
         if rabbit.health > 0.01:
-            health_diff = time_diff * 30  # attack power
+            attack_power = max(30.0 * (wolf_stength - rabbit_stength) + 20.0, 10.0)
+            health_diff = time_diff * attack_power
             rabbit.update_health(-health_diff)
         else:
             energy_diff = time_diff * 10  # eating speed
@@ -94,7 +98,7 @@ class WolfWolfMeeting(Meeting):
         if last_info is None:
             return 0
 
-        if wolf1.get_age() < 25.0 or wolf2.get_age() < 25.0:
+        if wolf1.get_age() < 20.0 or wolf2.get_age() < 20.0:
             return 0
 
         if wolf1.health < 20.0 or wolf2.health < 20.0:
@@ -106,7 +110,7 @@ class WolfWolfMeeting(Meeting):
         res = last_info['result']
         time_diff = time.time() - res
 
-        if time_diff > 10.0:
+        if time_diff > 5.0:
             wolf1.update_energy(-20.0)
             wolf2.update_energy(-20.0)
             for _ in range(random.randint(1, 3)):
