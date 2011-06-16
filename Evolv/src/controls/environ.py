@@ -9,11 +9,11 @@ import random
 import breve
 from breve import Control
 
-from agents.animal import Rabbit, Wolf
+from agents.animal import Rabbit, Wolf, Animal
 from agents.genetics import create_rabbit_genotype, create_wolf_genotype, Genotype
 from agents.plant import Plant
 from agents.teritory import Meadow, Forest
-from controls.chart import PhenotypeLog
+from controls.chart import PhenotypeLog, LiveLog
 
 
 class Environ(Control):
@@ -31,6 +31,8 @@ class Environ(Control):
         super(Environ, self).__init__()
 
         Environ.instance = self
+
+        self.beginTime = time.time()
 
         self.enableShadows()
         self.enableSmoothDrawing()
@@ -131,21 +133,31 @@ class Environ(Control):
             for rabbit in self.rabbits:
                 if rabbit.fat < 0.01:
                     print "Rabbit eaten"
+                    self.__on_rabbit_die(rabbit, LiveLog.EATEN)
                     self.rabbits.remove(rabbit)
                     breve.deleteInstance(rabbit)
-                if rabbit.get_age() > rabbit.die_at_age:
+                elif rabbit.get_age() > rabbit.die_at_age:
                     print "Rabbit died"
+                    self.__on_rabbit_die(rabbit, LiveLog.AGE)
                     self.rabbits.remove(rabbit)
                     breve.deleteInstance(rabbit)
+                elif rabbit.dead and not rabbit.was_eaten:
+                    if not rabbit.logged:
+                        print "Rabbit starved"
+                    self.__on_rabbit_die(rabbit, LiveLog.STARV)
+                elif rabbit.dead:
+                    self.__on_rabbit_die(rabbit, LiveLog.EATEN)
 
             for wolf in self.wolves:
                 if wolf.health < 0.01:
                     print "Wolf eaten"
                     self.wolves.remove(wolf)
+                    self.__on_wolf_die(wolf, LiveLog.STARV)
                     breve.deleteInstance(wolf)
-                if wolf.get_age() > wolf.die_at_age:
+                elif wolf.get_age() > wolf.die_at_age:
                     print "Wolf died"
                     self.wolves.remove(wolf)
+                    self.__on_wolf_die(wolf, LiveLog.AGE)
                     breve.deleteInstance(wolf)
         except Exception, e:
             print "ERROR: %s" % e
@@ -199,10 +211,31 @@ class Environ(Control):
 
     def __on_new_rabit(self, rabbit):
         self.rabbits.append(rabbit)
-        PhenotypeLog.append('rabbit', rabbit.generation, rabbit.phenotype)
+        timestamp = time.time() - self.beginTime
+        PhenotypeLog.append('rabbit', timestamp, rabbit.generation, rabbit.phenotype)
+        LiveLog.append('rabbit', timestamp, rabbit.generation, 0, LiveLog.BIRTH)
 
     def __on_new_wolf(self, wolf):
         self.wolves.append(wolf)
-        PhenotypeLog.append('wolf', wolf.generation, wolf.phenotype)
+        timestamp = time.time() - self.beginTime
+        PhenotypeLog.append('wolf', timestamp, wolf.generation, wolf.phenotype)
+        LiveLog.append('wolf', timestamp, wolf.generation, 0, LiveLog.BIRTH)
 
+    def __on_rabbit_die(self, rabbit, type):
+        if rabbit.logged :
+            return
+        rabbit.logged = True
+        timestamp = time.time() - self.beginTime
+        livetime = time.time() - rabbit.born_time
+        print "rabbit", type
+        LiveLog.append('rabbit', timestamp, rabbit.generation, livetime, type)
+
+    def __on_wolf_die(self, wolf, type):
+        if wolf.logged :
+            return
+        wolf.logged = True
+        timestamp = time.time() - self.beginTime
+        livetime = time.time() - wolf.born_time
+        print "wolf", type
+        LiveLog.append('wolf', timestamp, wolf.generation, livetime, type)
 

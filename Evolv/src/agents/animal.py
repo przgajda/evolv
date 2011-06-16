@@ -16,7 +16,6 @@ from meeting import RabbitPlantMeeting, WolfRabbitMeeting, RabbitRabbitMeeting
 from agents.meeting import WolfWolfMeeting
 from agents.teritory import Meadow
 
-
 class Animal(Mobile):
 
     NEIGHBORHOOD = 10
@@ -42,6 +41,8 @@ class Animal(Mobile):
         self.v_vector = None
         self.on_meadow_time = 0
         self.on_meadow = False
+        self.dead = False
+        self.logged = False
 
         self.on_forest_time = 0
         self.on_forest = False
@@ -223,6 +224,7 @@ class Rabbit(Animal):
         self.die_at_age = random.randint(int(Rabbit.MAX_AGE * 0.7), int(Rabbit.MAX_AGE * 1.3))
 
         self.setColor(breve.vector(0.9, 0.9, 0.9))
+        self.was_eaten = False
 
     def see_plants(self, plants):
         if not plants:
@@ -281,6 +283,7 @@ class Rabbit(Animal):
 
         if self.health < 0.01:
             self.go(None)
+            self.dead = True
             return  # rabbit died
 
         if self.next_v_update < time.time():
