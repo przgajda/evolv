@@ -46,6 +46,8 @@ class WolfRabbitMeeting(Meeting):
         rabbit_stength = rabbit.phenotype.get_phene('strength').get_value()
         wolf_stength = wolf.phenotype.get_phene('strength').get_value()
 
+        rabbit.was_eaten = True
+
         if rabbit.health > 0.01:
             attack_power = max(30.0 * (wolf_stength - rabbit_stength) + 20.0, 10.0)
             health_diff = time_diff * attack_power
